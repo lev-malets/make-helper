@@ -29,14 +29,15 @@ EOF
 }
 
 ext_git_clone_replacement=$(
-    mk_args 'repo/\1'
-    mk_arg  'repo/\1' url    '\2'
-    mk_arg  'repo/\1' commit '\3'
-
     cat <<< '
-'$KEYS'/repo/\1: '$KEYS'/args/repo/\1
+'$KEYS'/repo/commit/\1:
+    mkdir -p $(dir $@)
+    echo \3 > $@
+
+'$KEYS'/repo/\1: '$KEYS'/repo/commit/\1
     rm -rf '$TMP'/\1
-    git clone \2 '$TMP'/\1
+    git clone --no-checkout \2 '$TMP'/\1
+    git -C '$TMP'/\1 sparse-checkout set \4
     git -C '$TMP'/\1 config user.email _
     git -C '$TMP'/\1 config user.name _
     git -C '$TMP'/\1 checkout \3 -b _
@@ -45,21 +46,20 @@ ext_git_clone_replacement=$(
 '
 )
 
-ext_git_clone_regexp='^$(clone\s\+\(\w\+\),\([[:graph:]]\+\),\(\w\+\))'
+ext_git_clone_regexp='^$(clone\s\+\(\w\+\),\([[:graph:]]\+\),\(\w\+\),\([[:graph:][:blank:]]\+\))'
 ext_git_clone="s/$ext_git_clone_regexp/$(replacement "$ext_git_clone_replacement")/"
 
 ext_git_patch_replacement=$(
     cat << EOS
 $KEYS/patch/\\1: $KEYS/repo/\\1 \\2
-    git -C $TMP/\\1 reset \$(shell cat $KEYS/arg/repo/\\1/commit) --hard
+    git -C $TMP/\\1 reset HEAD --hard
     patch -d $TMP/\\1 -p1 < \\2
     git -C $TMP/\\1 add .
-    git -C $TMP/\\1 commit -m '_'
     mkdir -p \$(dir \$@)
     touch \$@
 
 $DIR/update_patch/\\1: $KEYS/repo/\\1
-    git -C $TMP/\\1 diff \$(shell cat $KEYS/arg/repo/\\1/commit) > \\2
+    git -C $TMP/\\1 diff HEAD > \\2
 
 .PHONY: $DIR/update_patch/\\1
 EOS
