@@ -20,7 +20,6 @@ header=$(cat << EOS
 .PHONY: $DIR $CLEAN
 clean: $CLEAN
 $DIR: $SUB_DIRS $KEYS/done
-    @ true
 
 $KEYS/done: $KEYS/dirs
     touch \$@
