@@ -14,6 +14,8 @@ force: ;
 MAIN_FILE := $(lastword $(MAKEFILE_LIST))
 HELPER_DIR := $(patsubst %/,%,$(dir $(MAIN_FILE)))
 
+touch = mkdir -p $(dir $@) && touch $@
+
 _ := $(shell HELPER_DIR=$(HELPER_DIR) make --makefile=$(HELPER_DIR)/mk.mk) all)
 
 include $(shell find tmp/__mk -name .mk | sort)
