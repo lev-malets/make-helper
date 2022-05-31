@@ -2,7 +2,7 @@
 
 set -e
 
-INPUT_FILE=$(sed 's/\.\///' <<< $1)
+INPUT_FILE=$(sed 's/\.\///' <<<$1)
 
 DIR=$(dirname $INPUT_FILE)
 KEYS=tmp/__keys/$DIR
@@ -16,7 +16,8 @@ SUB_FILES=$(find $DIR -mindepth 2 -maxdepth 2 -name .mk)
 SUB_DIRS=$(echo $SUB_FILES | sed 's/\/.mk$//g')
 CLEAN=$DIR.clean
 
-header=$(cat << EOS
+header=$(
+    cat <<EOS
 .PHONY: $DIR $CLEAN
 clean: $CLEAN
 $DIR: $SUB_DIRS $KEYS/done
@@ -35,4 +36,4 @@ $CLEAN:
 EOS
 )
 
-cat <<< $header | sed 's/^\s\+/\t/'
+cat <<<$header | sed 's/^\s\+/\t/'

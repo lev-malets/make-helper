@@ -4,14 +4,14 @@
 . $1/mk_common.sh $2
 
 function replacement {
-    sed 's/\//\\\//g' <<< $1 |
-    sed 's/^\s\+/\\t/' |
-    sed 's/\&/\\\&/g' |
-    awk 'NR == 1 { line = $0 } NR > 1 { line = line "\\n" $0} END { print line }'
+    sed 's/\//\\\//g' <<<$1 |
+        sed 's/^\s\+/\\t/' |
+        sed 's/\&/\\\&/g' |
+        awk 'NR == 1 { line = $0 } NR > 1 { line = line "\\n" $0} END { print line }'
 }
 
 function mk_args {
-    cat << EOF
+    cat <<EOF
 $KEYS/args/$1:
     mkdir -p \$(dir \$@)
     touch \$@
@@ -19,7 +19,7 @@ EOF
 }
 
 function mk_arg {
-    cat << EOF
+    cat <<EOF
 $KEYS/arg/$1/$2: force
     @ true \$(shell VALUE=$3 bash -c ' \
         (test -f \$@ && test "\$\$(cat \$@)" = "\$\$VALUE") \
@@ -29,7 +29,7 @@ EOF
 }
 
 ext_git_clone_replacement=$(
-    cat <<< '
+    cat <<<'
 '$KEYS'/repo/commit/\1:
     mkdir -p $(dir $@)
     echo \3 > $@
@@ -50,7 +50,7 @@ ext_git_clone_regexp='^$(clone\s\+\(\w\+\),\([[:graph:]]\+\),\(\w\+\),\([[:graph
 ext_git_clone="s/$ext_git_clone_regexp/$(replacement "$ext_git_clone_replacement")/"
 
 ext_git_patch_replacement=$(
-    cat << EOS
+    cat <<EOS
 $KEYS/patch/\\1: $KEYS/repo/\\1 \\2
     git -C $TMP/\\1 reset HEAD --hard
     patch -d $TMP/\\1 -p1 < \\2
